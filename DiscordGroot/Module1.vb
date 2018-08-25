@@ -8,6 +8,7 @@ Module Module1
     Private WithEvents _client As DiscordSocketClient
     Private token As String
     Private channel_name As String
+    Private bot_mute As Boolean = False
 
     Sub Main()
         Dim jObj As JObject = JObject.Parse(IO.File.ReadAllText("settings.json"))
@@ -30,13 +31,36 @@ Module Module1
     End Function
 
     Private Async Function MessageRecievedAsync(s As SocketMessage) As Task Handles _client.MessageReceived
+        If s.Channel.Name <> channel_name Then Return
         If s Is Nothing Then Return
         If s.Author.IsBot Then Return
         Dim context = New SocketCommandContext(_client, s)
 
-        If s.Channel.Name = channel_name Then
-            Await context.Channel.SendMessageAsync("I am Groot.")
-        End If
+        Dim strEnd As String
+
+        Select Case Int(s.Content.Length Mod 10)
+            Case 0
+                strEnd = "?"
+            Case 1
+                strEnd = "."
+            Case 2
+                strEnd = "!"
+            Case 3
+                strEnd = "..."
+            Case 4
+                strEnd = "..?"
+            Case 5
+                strEnd = "..!"
+            Case 6
+                strEnd = "..?!"
+            Case 7
+                strEnd = "!!!!"
+            Case Else
+                strEnd = "."
+
+        End Select
+
+        Await context.Channel.SendMessageAsync("I am Groot" & strEnd)
 
     End Function
 
